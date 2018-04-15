@@ -1,29 +1,45 @@
 package WattFarmSource;
 
+//This will probably become database access methods
+
 public class Profiles {
-	public static String[][] RowerList = { {"sean123" , "password"} , {"rower45" , "ergometer"}};
-	public static String[][] CoachList = { {"coach123" , "password"} , {"wattFarmer" , "megaphone"}};
+	public static Rower[] RowerList = {new Rower("Sean" , 1, "rower1", "password")};
+	public static Coach[] CoachList = {new Coach("Coach" , 1, "coach1", "password")};
 	
-	public static boolean validRowerLogin (String username, String password){
-		for(int i = 0; i < RowerList.length; i++) {
-			for(int j = 0; j < RowerList[i].length; j++) {
-				if(username.equals(RowerList[i][j])) {
-					return true;
-				}
+	public static int CoachLogin (String username, String password){
+		for(int i = 0; i < CoachList.length ; i++) {
+			if(CoachList[i].password.equals(password) && CoachList[i].username.equals(username)) {
+				return CoachList[i].ID;
 			}
 		}
-		return false;
+		return -1; //invalid login
+	}
+	
+	public static int RowerLogin (String username, String password){
+		for(int i = 0; i < RowerList.length; i++) {
+			if(RowerList[i].password.equals(password) && RowerList[i].username.equals(username)) {
+				return RowerList[i].ID;
+			}
+		}
+		return -1; //invalid login
 	}
 	
 	
-	public static boolean validCoachLogin (String username, String password){
-		for(int i = 0; i < CoachList.length; i++) {
-			for(int j = 0; j < CoachList[i].length; j++) {
-				if(username.equals(CoachList[i][j])) {
-					return true;
-				}
+	public static Rower getRowerFromDB(int ID) {
+		for(int i = 0; i < RowerList.length ; i++) {
+			if(RowerList[i].ID == ID) {
+				return RowerList[i];
 			}
 		}
-		return false;
+		return null; //invalid no userExists with that ID
+	}
+	
+	public static Coach getCoachFromDB(int ID) {
+		for(int i = 0; i < CoachList.length ; i++) {
+			if(CoachList[i].ID == ID) {
+				return CoachList[i];
+			}
+		}
+		return null; //invalid no userExists with that ID
 	}
 }

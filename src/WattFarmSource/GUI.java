@@ -6,16 +6,16 @@ import java.awt.event.ActionListener;
 import javax.swing.*;
 
 
+
 public class GUI {
-	public static Session session;
-	
-	public static void main(final String[] args) {
+	//main method for WattFarm. Launches software
+	public static void main(String[] args) {
 		loginSys();
-    }
+	}
+	
 	
 	/**
 	 * Login system GUI
-	 * @return String[] with {username, password, type}
 	 */
 	public static void loginSys() {
 		JFrame parent = new JFrame("WattFarm Login");
@@ -79,12 +79,22 @@ public class GUI {
                 	type = 'C';
                 }
                 
+                int loginID;
                 /*Check if valid Login*/
-                if( Profiles.validRowerLogin(enteredUN, enteredPW) && type == 'R' ){
-                	GUI.session = new Session(enteredUN, enteredPW, type);
+                if( (Profiles.RowerLogin(enteredUN, enteredPW) > 0) && type == 'R' ){
+                	//Login and begin a rower session
+                	loginID = Profiles.RowerLogin(enteredUN, enteredPW);
+                	Session.setRower(Profiles.getRowerFromDB(loginID));
+                	Session.setTypeOfSession('R');
+                	parent.dispose();
+                	rowerMainMenu();
                 }
-                else if( Profiles.validCoachLogin(enteredUN, enteredPW) && type == 'C' ){
-                	GUI.session = new Session(enteredUN, enteredPW, type);
+                else if( (Profiles.CoachLogin(enteredUN, enteredPW) > 0) && type == 'C' ){
+                	loginID = Profiles.CoachLogin(enteredUN, enteredPW);
+                	Session.setCoach(Profiles.getCoachFromDB(loginID));
+                	Session.setTypeOfSession('C');
+                	parent.dispose();
+                	coachMainMenu();
                 }
                 else if(enteredUN.equals("") && enteredPW.equals("")){
                 	JOptionPane.showMessageDialog(null,"Please insert Username and Password");
@@ -100,4 +110,11 @@ public class GUI {
 	}
 
 	
+	public static void rowerMainMenu() {
+		System.out.print("New Rower Session created!");
+	}
+	
+	public static void coachMainMenu() {
+		System.out.print("New Coach Session created!");
+	}
 }

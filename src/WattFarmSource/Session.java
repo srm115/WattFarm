@@ -1,11 +1,36 @@
 package WattFarmSource;
 
 public class Session{
-	private Rower rower;
-	private Coach coach;
+	//only one of these will be logged in at a time, the other will be null
+	private static Rower rower;
+	private static Coach coach;
+	private static char typeOfSession;
 	
-	public Session(String username, String password, char type) {
-		System.out.println("Created a new session.");
-		System.exit(0);
+	public static boolean setRower(Rower newRower) {
+		rower = newRower;
+		return true;
 	}
+	
+	public static boolean setCoach(Coach newCoach) {
+		coach = newCoach;
+		return true;
+	}
+	
+	public static Coach getCoach() {
+		return coach;
+	}
+	
+	public static Rower getRower() {
+		return rower;
+	}
+
+	public static char getTypeOfSession() {
+		return typeOfSession;
+	}
+
+	public static void setTypeOfSession(char typeOfSession) {
+		Session.typeOfSession = typeOfSession;
+	}
+	
+	
 }
