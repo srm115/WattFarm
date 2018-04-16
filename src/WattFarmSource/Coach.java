@@ -11,7 +11,6 @@ public class Coach {
 	
 	
 	public Coach(String name, Team[] teams, int iD, String username, String password) {
-		super();
 		this.name = name;
 		this.teams = teams;
 		ID = iD;
