@@ -108,13 +108,32 @@ public class GUI {
             }
         });
 	}
-
 	
+	public static void createLoginSys() {
+		System.out.println("create new login system");
+	}
+
 	public static void rowerMainMenu() {
 		System.out.print("New Rower Session created!");
 	}
 	
 	public static void coachMainMenu() {
 		System.out.print("New Coach Session created!");
+	}
+	
+	public static void graphicsMenu() {
+		System.out.println("Graphic menu!");
+	}
+	
+	public static void profileMenu() {
+		System.out.println("Profile menu!");
+	}
+	
+	public static void teamMenu() {
+		System.out.println("Teams menu!");
+	}
+	
+	public static void workoutMenu() {
+		System.out.println("Teams menu!");
 	}
 }

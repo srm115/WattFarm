@@ -1,16 +1,21 @@
 package WattFarmSource;
 
-import java.awt.Dimension;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 
-public class Graphic {
-	public static void main(String[] args) {
-		JFrame jframe = new JFrame("Graphic Window");
-        
-        jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        jframe.setPreferredSize(new Dimension(400, 300));
-        jframe.pack();
-        jframe.setLocationRelativeTo(null);
-        jframe.setVisible(true);
+public class Graphic extends JPanel{
+	int[][] data;
+	JFrame plot;
+	
+	public Graphic (int[][] data) {
+		this.data = data;
+	}
+	
+	public void exportPlot() {
+		
+	}
+	
+	public void createPlot() {
+		
 	}
 }
