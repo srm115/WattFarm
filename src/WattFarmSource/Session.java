@@ -31,6 +31,4 @@ public class Session{
 	public static void setTypeOfSession(char typeOfSession) {
 		Session.typeOfSession = typeOfSession;
 	}
-	
-	
 }

@@ -12,6 +12,7 @@ public class Workout {
 	private Date datePerformed; //year, month, date format
 	private int userID; //ID of the athlete who performed workout
 	private int ID;
+	private String tag; //what kind of workout it is
 	
 	//justForTesting
 	public Workout() {
@@ -91,6 +92,14 @@ public class Workout {
 
 	public void setID(int iD) {
 		ID = iD;
+	}
+
+	public String getTag() {
+		return tag;
+	}
+
+	public void setTag(String tag) {
+		this.tag = tag;
 	}
 	
 }
