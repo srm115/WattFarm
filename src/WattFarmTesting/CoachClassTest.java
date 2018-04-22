@@ -1,4 +1,3 @@
-package WattFarmTesting;
 
 import org.junit.Test;
 
