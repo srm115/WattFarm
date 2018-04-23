@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Sun Apr 22 22:41:49 EDT 2018:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.1.0 - (1808820): instance a816c00e-0162-f060-f58a-00001db946c0 
+on database directory /Users/sean/Documents/School/Software Engineering/WATTFARM_DB with class loader sun.misc.Launcher$AppClassLoader@5c647e05 
+Loaded from file:/Users/sean/Documents/School/Software%20Engineering/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=1.8.0_161-b12
+user.dir=/Users/sean/Documents/School/Software Engineering
+os.name=Mac OS X
+os.arch=x86_64
+os.version=10.13.4
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
