@@ -16,7 +16,7 @@ public class Profiles {
 			"password")};
 	
 	
-	public static Coach[] CoachList = {new Coach("Coach" , new Team[] {}, 1, "coach1" , "password")};
+	public static Coach[] CoachList = {new Coach("Coach" , new Team(new Rower[] {}, null, null), 1, "coach1" , "password")};
 	
 	public static int CoachLogin (String username, String password){
 		for(int i = 0; i < CoachList.length ; i++) {

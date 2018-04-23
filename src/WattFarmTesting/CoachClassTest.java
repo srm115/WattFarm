@@ -14,11 +14,11 @@ public class CoachClassTest {
 	public void testCoachConstructor() {
 		//create a coach with test values
 		String testString = "test";
-		Team[] testTeams = {null};
+		Team testTeam = null;
 		int testInt = 0;
 		
 		try {
-			Coach coach = new Coach(testString, testTeams, testInt, testString, testString);
+			Coach coach = new Coach(testString, testTeam, testInt, testString, testString);
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}

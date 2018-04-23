@@ -2,7 +2,7 @@ package WattFarmSource;
 
 public class Coach {
 	private String name;
-	private Team[] teams;
+	private Team team;
 	private int ID;
 	
 	//going to have to change this, but for now just use PW and UN here
@@ -10,9 +10,9 @@ public class Coach {
 	private String password;
 	
 	
-	public Coach(String name, Team[] teams, int iD, String username, String password) {
+	public Coach(String name, Team team, int iD, String username, String password) {
 		this.name = name;
-		this.teams = teams;
+		this.team = team;
 		ID = iD;
 		this.username = username;
 		this.password = password;
@@ -25,11 +25,11 @@ public class Coach {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public Team[] getTeams() {
-		return teams;
+	public Team getTeam() {
+		return team;
 	}
-	public void setTeams(Team[] teams) {
-		this.teams = teams;
+	public void setTeam(Team team) {
+		this.team = team;
 	}
 	public int getID() {
 		return ID;
