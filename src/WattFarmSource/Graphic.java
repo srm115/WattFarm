@@ -26,10 +26,10 @@ public class Graphic extends JPanel{
 	private static final int POINT_WIDTH = 12;
 	
 	private static final int BORDER = 30;
-   private static final Color LINE_COLOR = Color.blue;
-   private static final Color POINT_COLOR = Color.red;
-   private static final Stroke LINE = new BasicStroke(3f);
-   private static final int Y_SCALE = 10;
+	private static final Color LINE_COLOR = Color.blue;
+	private static final Color POINT_COLOR = Color.red;
+	private static final Stroke LINE = new BasicStroke(3f);
+	private static final int Y_SCALE = 10;
 	
 	private static int MAX_Y = 0;
 
