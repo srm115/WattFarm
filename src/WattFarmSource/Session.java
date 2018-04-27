@@ -2,6 +2,8 @@ package WattFarmSource;
 
 import java.sql.*;
 
+import javax.swing.JOptionPane;
+
 public class Session{
 
 	public static final String DRIVER = "org.apache.derby.jdbc.EmbeddedDriver";
@@ -28,7 +30,6 @@ public class Session{
 			ResultSet rs = stmt.executeQuery(sql);
 
 			if(!rs.next()) {
-				System.out.println("invalid login");
 				if (connection != null) connection.close();
 				return false;
 			}
@@ -39,7 +40,7 @@ public class Session{
 					String DBusername  = rs.getString("username");
 					String DBpassword = rs.getString("password");
 
-					System.out.println(coachID + "logged in");
+					JOptionPane.showMessageDialog(null,"Logged in.");
 					if (connection != null) connection.close();
 					return true;
 				}
@@ -54,7 +55,6 @@ public class Session{
 			ResultSet rs = stmt.executeQuery(sql);
 
 			if(!rs.next()) {
-				System.out.println("invalid login");
 				return false;
 			}
 			else {
@@ -64,7 +64,7 @@ public class Session{
 					String DBusername  = rs.getString("username");
 					String DBpassword = rs.getString("password");
 
-					System.out.println(rowerID + "logged in");
+					JOptionPane.showMessageDialog(null,"Logged in.");
 					if (connection != null) connection.close();
 					return true;
 				}

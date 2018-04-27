@@ -186,11 +186,11 @@ public class GUI {
 
 				try {
 					if(Session.addUser(enteredUN, enteredPW, type)) {
-						System.out.println("New User created");
+						JOptionPane.showMessageDialog(null,"New user created.");
 						createLoginFrame.dispose();
 					}
 					else {
-						System.out.println("Error, user alread exists. Please try again");
+						JOptionPane.showMessageDialog(null,"User already exists! Please try again.");
 					}
 				} catch (ClassNotFoundException e1) {
 					// TODO Auto-generated catch block
@@ -306,12 +306,10 @@ public class GUI {
 	}
 
 	public static void coachCreateGraphicPage() {
-		System.out.println("Coach Create Graphic Page!");
 		System.exit(0);
 	}
 
 	public static void coachViewGraphicPage() {
-		System.out.println("Coach View Graphic Page!");
 		System.exit(0);
 	}
 
@@ -347,7 +345,6 @@ public class GUI {
 	}
 
 	public static void coachEditProfilePage() {
-		System.out.println("Coach Edit Profile Page!");
 		System.exit(0);
 	}
 
@@ -392,12 +389,10 @@ public class GUI {
 	}
 
 	public static void viewTeamsPage() {
-		System.out.println("View Teams Page!");
 		System.exit(0);
 	}
 
 	public static void editTeamsPage() {
-		System.out.println("Edit Teams Page!");
 		System.exit(0);
 	}
 
@@ -433,7 +428,6 @@ public class GUI {
 	}
 
 	public static void coachViewWorkoutPage() {
-		System.out.println("Coach View Workout Page!");
 		System.exit(0);
 	}
 
@@ -537,12 +531,10 @@ public class GUI {
 	}
 
 	public static void rowerCreateGraphicPage() {
-		System.out.println("Rower Create Graphic Page!");
 		System.exit(0);
 	}
 
 	public static void rowerViewGraphicPage() {
-		System.out.println("Rower View Graphic Page!");
 		System.exit(0);
 	}
 
@@ -578,7 +570,6 @@ public class GUI {
 	}
 
 	public static void rowerEditProfilePage() {
-		System.out.println("Coach Edit Profile Page!");
 		System.exit(0);
 	}
 
@@ -632,17 +623,14 @@ public class GUI {
 	}
 
 	public static void newWorkoutPage() {
-		System.out.println("New Workout Page!");
 		System.exit(0);
 	}
 
 	public static void editWorkoutPage() {
-		System.out.println("Edit Workout Page!");
 		System.exit(0);
 	}
 
 	public static void viewRowerWorkoutsPage() {
-		System.out.println("View Rower Workouts Page!");
 		System.exit(0);
 	}
 
