@@ -1,105 +1,70 @@
 package WattFarmSource;
 
-import java.sql.Date;
+import java.text.ParseException;
+
 
 public class Workout {
-	//all variables are arrays to handle interval workout.
-	private double[] distance;
-	private double[] time;
-	private double[] split;
-	private double[] avgWatt;
-	private int[] spm;
-	private Date datePerformed; //year, month, date format
-	private int userID; //ID of the athlete who performed workout
-	private int ID;
+	private int distance;
+	private int time;
+	private int split;
+	private int avgWatt;
+	private int spm;
+	private String datePerformed; //yyyy-MM-dd
 	private String tag; //what kind of workout it is
 	
-	//justForTesting
-	public Workout() {
-		
+	public Workout(int distance, int time, int split, int avgWatt, int spm,
+			String datePerformed, String tag) throws ParseException {
+		this.distance = distance;
+		this.time = time;
+		this.split = split;
+		this.avgWatt = avgWatt;
+		this.spm = spm;
+		this.datePerformed = datePerformed;
+		this.tag = tag;
 	}
 	
-	public Workout(double[] distance, double[] time, double[] split, double[] avgWatt, int[] spm, Date datePerformed, int userID, int ID) {
-		this.distance = distance;
-		this.time = time;
-		this.split = split;
-		this.avgWatt = avgWatt;
-		this.spm = spm;
-		this.datePerformed = datePerformed;
-		this.userID = userID;
-		this.ID = ID;
-	}
-
-	public double[] getDistance() {
+	public int getDistance() {
 		return distance;
 	}
-
-	public void setDistance(double[] distance) {
+	public void setDistance(int distance) {
 		this.distance = distance;
 	}
-
-	public double[] getTime() {
+	public int getTime() {
 		return time;
 	}
-
-	public void setTime(double[] time) {
+	public void setTime(int time) {
 		this.time = time;
 	}
-
-	public double[] getSplit() {
+	public int getSplit() {
 		return split;
 	}
-
-	public void setSplit(double[] split) {
+	public void setSplit(int split) {
 		this.split = split;
 	}
-
-	public double[] getAvgWatt() {
+	public int getAvgWatt() {
 		return avgWatt;
 	}
-
-	public void setAvgWatt(double[] avgWatt) {
+	public void setAvgWatt(int avgWatt) {
 		this.avgWatt = avgWatt;
 	}
-
-	public int[] getSpm() {
+	public int getSpm() {
 		return spm;
 	}
-
-	public void setSpm(int[] spm) {
+	public void setSpm(int spm) {
 		this.spm = spm;
 	}
-
-	public Date getDatePerformed() {
+	public String getDatePerformed() {
 		return datePerformed;
 	}
-
-	public void setDatePerformed(Date datePerformed) {
+	public void setDatePerformed(String datePerformed) {
 		this.datePerformed = datePerformed;
 	}
-
-	public int getUserID() {
-		return userID;
-	}
-
-	public void setUserID(int userID) {
-		this.userID = userID;
-	}
-
-	public int getID() {
-		return ID;
-	}
-
-	public void setID(int iD) {
-		ID = iD;
-	}
-
 	public String getTag() {
 		return tag;
 	}
-
 	public void setTag(String tag) {
 		this.tag = tag;
 	}
+
 	
 }

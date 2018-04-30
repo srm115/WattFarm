@@ -1,10 +1,17 @@
 package WattFarmSource;
 
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.swing.*;
+import javax.swing.text.DateFormatter;
 import javax.swing.text.JTextComponent;
 
 
@@ -89,11 +96,17 @@ public class GUI {
 
 
 				try {
-					if(Session.checkUser(enteredUN, enteredPW, type)) {
+					if(Session.checkUser(enteredUN, enteredPW, type) != 1) {
 						if(type == 'R') {
+							Session.logInRower(enteredUN, enteredPW, type);
+							JOptionPane.showMessageDialog(null,"Logged in.");
 							rowerMainMenu();
+							parent.dispose();
 						} else {
+							Session.logInRower(enteredUN, enteredPW, type);
+							JOptionPane.showMessageDialog(null,"Logged in.");
 							coachMainMenu();
+							parent.dispose();
 						}
 
 					}
@@ -121,6 +134,7 @@ public class GUI {
 		//Create New Login Button Listener
 		createLoginButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				parent.dispose();
 				createLogin();
 			}
 		});
@@ -185,9 +199,10 @@ public class GUI {
 				}
 
 				try {
-					if(Session.addUser(enteredUN, enteredPW, type)) {
+					if(Session.checkUser(enteredUN, enteredPW, type) == -1) {
 						JOptionPane.showMessageDialog(null,"New user created.");
 						createLoginFrame.dispose();
+						loginSys();
 					}
 					else {
 						JOptionPane.showMessageDialog(null,"User already exists! Please try again.");
@@ -222,6 +237,7 @@ public class GUI {
 		JButton profileButton = new JButton("Profile");
 		JButton workoutsButton = new JButton("Workouts");
 
+
 		/* Layout of panel */
 		teamsButton.setBounds(10, 10, 100, 20);
 		graphicsButton.setBounds(10, 40, 100, 20);
@@ -229,11 +245,13 @@ public class GUI {
 		workoutsButton.setBounds(10, 100, 100, 20);
 
 
+
 		/* Add everything in and display */
 		menuPanel.add(teamsButton);
 		menuPanel.add(graphicsButton);
 		menuPanel.add(profileButton);
 		menuPanel.add(workoutsButton);
+
 
 		parent.getContentPane().add(menuPanel);
 		parent.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -277,15 +295,18 @@ public class GUI {
 
 		JButton createButton = new JButton("Create Graphic");
 		JButton viewButton = new JButton("View Graphic");
+		JButton mainButton = new JButton("Main Menu");
 
 		/* Layout of panel */
 		createButton.setBounds(10, 10, 100, 20);
 		viewButton.setBounds(10, 40, 100, 20);
+		mainButton.setBounds(120, 10, 100, 20);
 
 
 		/* Add everything in and display */
 		menuPanel.add(createButton);
 		menuPanel.add(viewButton);
+		menuPanel.add(mainButton);
 
 		parent.getContentPane().add(menuPanel);
 		parent.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -299,8 +320,15 @@ public class GUI {
 		});
 
 		viewButton.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent e) {
 				coachViewGraphicPage();
+			}
+		});
+
+		mainButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				coachMainMenu();
 			}
 		});
 	}
@@ -480,12 +508,14 @@ public class GUI {
 		profileButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				rowerProfileMenu();
+				parent.dispose();
 			}
 		});
 
 		workoutsButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				rowerWorkoutsMenu();
+				parent.dispose();
 			}
 		});
 	}
@@ -586,17 +616,21 @@ public class GUI {
 		JButton newButton = new JButton("New Workout");
 		JButton editButton = new JButton("Edit Workout");
 		JButton viewButton = new JButton("View Workouts");
+		JButton mainButton = new JButton("Main Menu");
 
 		/* Layout of panel */
 		newButton.setBounds(10, 10, 100, 20);
 		editButton.setBounds(10, 40, 100, 20);
 		viewButton.setBounds(10, 70, 100, 20);
+		mainButton.setBounds(120, 10, 100, 20);
 
 
 		/* Add everything in and display */
 		menuPanel.add(newButton);
 		menuPanel.add(editButton);
 		menuPanel.add(viewButton);
+		menuPanel.add(mainButton);
+
 
 		parent.getContentPane().add(menuPanel);
 		parent.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -606,32 +640,238 @@ public class GUI {
 		newButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				newWorkoutPage();
+				parent.dispose();
 			}
 		});
 
 		editButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				editWorkoutPage();
+				parent.dispose();
 			}
 		});
 
 		viewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				viewRowerWorkoutsPage();
+				parent.dispose();
+			}
+		});
+
+		mainButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				rowerMainMenu();
+				parent.dispose();
 			}
 		});
 	}
 
 	public static void newWorkoutPage() {
-		System.exit(0);
+		JFrame parent = new JFrame("Enter Workout Information");
+		parent.setSize(300,375);
+		parent.setLocation(500,280);
+
+		JPanel formPanel = new JPanel();
+		formPanel.setLayout(new FlowLayout());
+
+		/*Content in loginPanel */
+		JLabel distanceLabel = new JLabel("Distance (m): ");
+		JSpinner distanceField = new JSpinner( new SpinnerNumberModel(
+				2000, //initial value
+				0, //min
+				100000, //max
+				10));//step);
+
+		JLabel splitLabel = new JLabel("Time/500m (s): ");
+		JSpinner splitField = new JSpinner( new SpinnerNumberModel(
+				120, //initial value
+				0, //min
+				500, //max
+				1));//step);
+
+		JLabel timeLabel = new JLabel("Time (s):         ");
+		JSpinner timeField = new JSpinner( new SpinnerNumberModel(
+				480, //initial value
+				0, //min
+				12000000, //max
+				1));//step);
+
+		JLabel wattsLabel = new JLabel("Average Watts (W): ");
+		JSpinner wattsField = new JSpinner( new SpinnerNumberModel(
+				10, //initial value
+				0, //min
+				2000, //max
+				1));//step);
+
+		JLabel spmLabel = new JLabel("Strokes/Minute: ");
+		JSpinner spmField = new JSpinner( new SpinnerNumberModel(
+				20, //initial value
+				0, //min
+				100, //max
+				1));//step);
+
+		JLabel dateLabel = new JLabel("Date Completed: ");
+		SpinnerDateModel model = new SpinnerDateModel();
+		JSpinner dateField = new JSpinner(model);
+
+		JSpinner.DateEditor editor = new JSpinner.DateEditor(dateField, "yyyy.MM.dd");
+		DateFormatter formatter = (DateFormatter)editor.getTextField().getFormatter();
+		formatter.setAllowsInvalid(false);
+		formatter.setOverwriteMode(true);
+
+		JLabel tagLabel = new JLabel("Workout Tag:");
+		String[] tags = {"UT2", "UT1", "AT", "TR", "AN"};
+		SpinnerListModel strModel = new SpinnerListModel(tags);
+		JSpinner tagField = new JSpinner(strModel);
+
+
+		JButton enterButton = new JButton("Enter Workout");
+
+		/* Add stuff to panel */
+		JPanel distancePanel = new JPanel();
+		distancePanel.add(distanceLabel);
+		distancePanel.add(distanceField);
+		formPanel.add(distancePanel);
+
+		JPanel splitPanel = new JPanel();
+		splitPanel.add(splitLabel);
+		splitPanel.add(splitField);
+		formPanel.add(splitPanel);
+
+		JPanel timePanel = new JPanel();
+		timePanel.add(timeLabel);
+		timePanel.add(timeField);
+		formPanel.add(timePanel);
+
+
+		JPanel wattsPanel = new JPanel();
+		wattsPanel.add(wattsLabel);
+		wattsPanel.add(wattsField);
+		formPanel.add(wattsPanel);
+
+		JPanel spmPanel = new JPanel();
+		spmPanel.add(spmLabel);
+		spmPanel.add(spmField);
+		formPanel.add(spmPanel);
+
+		JPanel datePanel = new JPanel();
+		datePanel.add(dateLabel);
+		datePanel.add(dateField);
+		formPanel.add(datePanel);
+
+		JPanel tagPanel = new JPanel();
+		tagPanel.add(tagLabel);
+		tagPanel.add(tagField);
+		formPanel.add(tagPanel);
+
+		JPanel enterPanel = new JPanel();
+		enterPanel.add(enterButton);
+		formPanel.add(enterPanel);
+
+		parent.getContentPane().add(formPanel);
+		parent.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		parent.setVisible(true);
+
+		/*verify login info*/
+		enterButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+					String newDateStr = format.format(dateField.getValue());
+
+					if(Session.addNewWorkout(new Workout(
+							(Integer) distanceField.getValue(),
+							(Integer) timeField.getValue(),
+							(Integer) splitField.getValue(),
+							(Integer) wattsField.getValue(),
+							(Integer) spmField.getValue(),
+							newDateStr,
+							(String) tagField.getValue()))){
+
+						JOptionPane.showMessageDialog(null,"Workout logged!");
+						parent.dispose();
+						rowerMainMenu();
+					}
+					else {
+						JOptionPane.showMessageDialog(null,"Error, please try again.");
+						parent.dispose();
+						rowerMainMenu();
+					}
+				} catch (ClassNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (ParseException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+
+
+			}
+		});
 	}
 
 	public static void editWorkoutPage() {
-		System.exit(0);
+		
 	}
 
 	public static void viewRowerWorkoutsPage() {
-		System.exit(0);
-	}
+		JFrame parent = new JFrame("Workouts Menu");
+		parent.setSize(500, 500);;
+		parent.setLocation(500,280);
 
+		JPanel workoutsPanel = new JPanel();
+		//workoutsPanel.setLayout (new BorderLayout());
+		
+		/*Content in menuPanel */
+
+		JButton editButton = new JButton("Edit Workout");
+		JButton mainButton = new JButton("Main Menu");
+		
+		
+		JScrollPane scroller = new JScrollPane();
+		scroller.setLayout(null);
+		/*Display all workouts belonging to that rower */
+		try {
+			scroller = new JScrollPane(Session.getRowerWorkouts());
+		} catch (ClassNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		workoutsPanel.add(scroller);
+
+		/* Add everything in and display */
+		JPanel menuPanel = new JPanel();
+		menuPanel.add(editButton);
+		menuPanel.add(mainButton);
+		
+		workoutsPanel.add(menuPanel);
+		
+		parent.getContentPane().add(workoutsPanel);
+		parent.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		parent.setVisible(true);
+
+		/* Action Listeners */
+
+		editButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				editWorkoutPage();
+				parent.dispose();
+			}
+		});
+
+
+		mainButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				rowerMainMenu();
+				parent.dispose();
+			}
+		});
+	}
 }
