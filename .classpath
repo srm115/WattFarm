@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry excluding="WattFarmTesting/" kind="src" path="src"/>
 	<classpathentry kind="src" path="src/WattFarmTesting"/>
+	<classpathentry kind="src" path="images"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>
 	<classpathentry kind="lib" path="lib/derby.jar"/>

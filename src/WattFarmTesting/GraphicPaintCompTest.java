@@ -9,6 +9,7 @@ import WattFarmSource.Graphic;
 
 class GraphicPaintCompTest {
 	public static void main(String[] args) {
+		/*
 		List<Integer> data = new ArrayList<Integer>();
 		Random random = new Random();
 		int maxDataPoints = 16;
@@ -24,6 +25,6 @@ class GraphicPaintCompTest {
 		frame.getContentPane().add(mainPanel);
 		frame.pack();
 		frame.setLocationByPlatform(true);
-		frame.setVisible(true);
+		frame.setVisible(true);*/
 	}
 }
