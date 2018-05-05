@@ -1,109 +1,90 @@
 import java.sql.SQLException;
-
-import javax.swing.JFrame;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
+import java.text.ParseException;
 
 import org.junit.Test;
 
 import WattFarmSource.Session;
+import WattFarmSource.Workout;
 import junit.framework.TestCase;
 
 public class TestSession extends TestCase {
 	@Test
-	public void testaddUser() throws SQLException, ClassNotFoundException {
+	public void testCoachMethods() throws SQLException, ClassNotFoundException {
 		//Test add coach user
 		assertEquals(Session.addUser("testaddUserUN", "testaddUserPW", 'C'), true);
 
-		//Test add rower user
-		assertEquals(Session.addUser("testaddUserUN", "testaddUserPW", 'R'), true);
+		//set to high val
+		Session.setCoachID(1111111);
 
-		//Test failure
-		assertEquals(Session.addUser("testaddUserUN", "testaddUserPW", 'F'), false);
+		//test get and sets
+		assertEquals(Session.getCoachID(), 1111111);
+
+		assertEquals(Session.isUser("testaddUserUN", "testaddUserPW", 'C'), true);
+
+		//test login
+		assertEquals(Session.logInCoach("testaddUserUN", "testaddUserPW"), true);
+
+		//test create a team
+		assertEquals(Session.createTeam("testTeam1"), true);
+
+		//test teamExists method
+		assertEquals(Session.teamExists("testTeam1"), true);
+
+		//test changeTeamCoachID
+		assertEquals(Session.changeTeamCoachID("testTeam1", 1111111), true);
+
+		//test getTeamName
+		assertEquals(Session.getTeamName(), "testTeam1");
+
+		//test changeCoachTeamID
+		assertEquals(Session.changeCoachTeamID(11111), true);
+
+		//test getTeamIDFromName
+		assertEquals(Session.getTeamIDFromName("asdf"), -1); //team doesn't exist
+
+		//test getCoachTeamID
+		assertEquals(Session.getCoachTeamID(), 11111);
+
+		//test getCoachTeamID
+		assertEquals(Session.getCoachTeamID(), 11111);
+
+		//test changeTeamCoachID
+		assertEquals(Session.changeTeamCoachID("testTeam1", 1111111), true);
+
+		//test changeCoachName
+		assertEquals(Session.changeCoachName("testName"), true);
 	}
 
 	@Test
-	public void testisUser() throws SQLException, ClassNotFoundException {
-		//Add a new coach user
-		Session.addUser("testisUserUN", "testisUserPW", 'C');
-		//Test isUser
-		assertEquals(Session.isUser("testisUserUN", "testisUserPW", 'C'), true);
+	public void testRowerMethods() throws SQLException, ClassNotFoundException {
+		//Test add coach user
+		assertEquals(Session.addUser("testaddRowerUN", "testaddRowerPW", 'R'), true);
 
+		//test login
+		assertEquals(Session.logInRower("testaddRowerUN", "testaddRowerPW"), true);
 
-		//Add a new coach user
-		Session.addUser("testisUserUN", "testisUserPW", 'R');
-		//Test isUser
-		assertEquals(Session.isUser("testisUserUN", "testisUserPW", 'R'), true);
+		//Create fake workout and test that it gets added
+		Workout workout = null;
 
-		//Test failures
-		assertEquals(Session.isUser("testisUserFail", "testisUserFail", 'C'), false);
-		assertEquals(Session.isUser("testisUserFail", "testisUserFail", 'R'), false);
-		assertEquals(Session.isUser("testisUserFail", "testisUserFail", 'F'), false);
-	}
+		try {
+			workout = new Workout(1,1,1,1,1,"","");
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		assertEquals(Session.addNewWorkout(workout), true);
 
-
-	@Test
-	public void testcreateTeam() throws SQLException, ClassNotFoundException {
-		//Test create team
-		assertEquals(Session.createTeam("testcreateTeamName"), true);
-
-		//Test failure
-		assertEquals(Session.createTeam(""), false);
-	}
-
-	@Test
-	public void testteamExists() throws SQLException, ClassNotFoundException {
-		//Create a team
-		Session.createTeam("testteamExistsName");
-
-		//Test if team was created
-		assertEquals(Session.teamExists("testteamExistsName"), true);
-
-		//Test failure
-		assertEquals(Session.teamExists("testteamExistsFail"), false);
-	}
-
-	@Test
-	public void testgetRoster() throws SQLException, ClassNotFoundException {
-		//tests that the JTable is created and can be added to a JFrame and displayed
-		JFrame testFrame = new JFrame();
-
-		JTable testTable1 = Session.getRoster();
-
-		assertEquals(testFrame.add(testTable1), testTable1);
-
-		//Create a coach user, log in, create a team
-		Session.addUser("testGetRosterUN", "testGetRosterPW", 'C');
-		Session.logInCoach("testGetRosterUN", "testGetRosterPW");
-		Session.createTeam("testGetRosterTeam");
-
-		//Create a rower user, log in, edit profile to join team
-		Session.addUser("testGetRosterUN", "testGetRosterPW", 'R');
-		Session.logInRower("testGetRosterUN", "testGetRosterPW");
-		Session.editRowerProfile("testName", 0, 0, 0, "testGetRosterTeam");
-
-		//Create a test JTable with just test rower user
-		DefaultTableModel model = new DefaultTableModel(new String[]{"ROWERID, NAME"}, 0);
-		int id = Session.getRowerID(); //test rower still logged in
-		String name = "testName";
-		model.addRow(new Object[]{id, name});
-		JTable testTable2 = new JTable();
-		testTable2.setModel(model);
-		testTable2.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+		//test edit profile
+		assertEquals(Session.editRowerProfile("testName", 1, 1, 1, ""),true);
 		
-		//Log coach back in
-		Session.logInCoach("testGetRosterUN", "testGetRosterPW");
+		//test get and set for rowerID
+		Session.setRowerID(99999); //high values
+		assertEquals(Session.getRowerID(), 99999);
 		
-		//Test that tables are the same
-		assertEquals(testTable2, Session.getRoster());
+		//test getRowerName
+		assertEquals(Session.getRowerName(99999), "testName");
 		
-		//Test Failure
-		JTable testFailTable = new JTable();
-		assertEquals(testFailTable, Session.getRoster());
-	}
-	
-	@Test
-	public void testgetCoachWorkouts() throws ClassNotFoundException , SQLException {
-		
+		//test getNumRowerWorkouts
+		assertEquals(Session.getNumRowerWorkouts(), 1);
 	}
 }

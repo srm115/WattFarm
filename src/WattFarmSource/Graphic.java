@@ -10,8 +10,6 @@ import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 import javax.swing.*;
 
 
@@ -55,7 +53,7 @@ public class Graphic extends JPanel{
 		Graphics2D g2 = (Graphics2D)g;
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-		double xScale = ((double) getWidth() - 2 * BORDER) / (data.size() - 1);
+		double xScale = ((double) getWidth() -  2 * BORDER) / (data.size() - 1);
 		double yScale = ((double) getHeight() - 2 * BORDER) / (MAX_Y - 1);
 
 
@@ -79,7 +77,7 @@ public class Graphic extends JPanel{
 		for (int i = 0; i < Y_MARKS + 1; i++) {
             int x0 = BORDER;
             int x1 = POINT_WIDTH + BORDER;
-            int y0 = getHeight() - ((i * (getHeight() - BORDER * 2 - BORDER)) / Y_MARKS + BORDER);
+            int y0 = getHeight() - (((i + 1) * (getHeight() - BORDER * 2)) / Y_MARKS + 7);
             int y1 = y0;
             if (data.size() > 0) {
                 String yLabel = ((int) ((MIN_Y + (MAX_Y - MIN_Y) * ((i * 1.0) / Y_MARKS)) * 100)) / 100.0 + "";
@@ -92,13 +90,13 @@ public class Graphic extends JPanel{
 
 		for (int i = 0; i < data.size(); i++) {
             if (data.size() > 1) {
-                int x0 = i * (getWidth() - BORDER * 2 - BORDER) / (data.size() - 1) + BORDER;
+            	int x0 = (i + 1) * (getWidth() - BORDER * 2) / (data.size() - 1) + BORDER;
                 int x1 = x0;
                 int y0 = getHeight() - BORDER;
                 int y1 = y0 - POINT_WIDTH;
                 if ((i % ((int) ((data.size() / 20.0)) + 1)) == 0) {
                     g2.setColor(Color.BLACK);
-                    String xLabel = i + "";
+                    String xLabel = (i + 2) + "";
                     FontMetrics metrics = g2.getFontMetrics();
                     int labelWidth = metrics.stringWidth(xLabel);
                     g2.drawString(xLabel, x0 - labelWidth / 2, y0 + metrics.getHeight() + 3);

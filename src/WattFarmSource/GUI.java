@@ -4,10 +4,11 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.HeadlessException;
 import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -32,8 +33,16 @@ public class GUI {
 	 * Login system GUI
 	 */
 	public static void loginSys(){
+		try {
+			Session.createDB(); //try to set up database, it might already be created
+		} catch (Exception e1) {
+			//Don't create it
+		}
+
+
 		JFrame parent = new JFrame("WattFarm Login");
-		parent.setLocation(750,500);
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		parent.setLocation(dim.width/2-parent.getSize().width/2, dim.height/2-parent.getSize().height/2);
 
 		//Add logo image to Panel
 		JLabel logoLabel = new JLabel();
@@ -46,7 +55,8 @@ public class GUI {
 			logoImage = ImageIO.read(f);
 		}
 		catch (IOException e){
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null,"Error");
+			loginSys();
 		}
 
 		Image scaledLogo = logoImage.getScaledInstance(logoLabel.getWidth(), logoLabel.getHeight(),
@@ -107,7 +117,7 @@ public class GUI {
 		parent.setVisible(true);
 
 
-		/*verify login info*/
+		//ActionListeners
 		loginButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				/*Get entered info*/
@@ -152,11 +162,11 @@ public class GUI {
 					}
 
 				} catch (ClassNotFoundException e2) {
-					// TODO Auto-generated catch block
-					e2.printStackTrace();
+					JOptionPane.showMessageDialog(null,"Error");
+					loginSys();
 				} catch (SQLException e2) {
-					// TODO Auto-generated catch block
-					e2.printStackTrace();
+					JOptionPane.showMessageDialog(null,"Error");
+					loginSys();
 				}
 			}
 		});
@@ -192,7 +202,8 @@ public class GUI {
 		JButton backButton = new JButton("Back to Login");
 
 		createLoginFrame.setSize(300,250);
-		createLoginFrame.setLocation(500,280);
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		createLoginFrame.setLocation(dim.width/2-createLoginFrame.getSize().width/2, dim.height/2-createLoginFrame.getSize().height/2);
 		newUserPanel.setLayout (null); 
 
 
@@ -238,15 +249,18 @@ public class GUI {
 						createLoginFrame.dispose();
 						loginSys();
 					}
-					else {
+					else if(enteredUN.equals("") && enteredPW.equals("")){
+						JOptionPane.showMessageDialog(null,"Please create a Username and Password");
+					}
+					else{
 						JOptionPane.showMessageDialog(null,"User already exists! Please try again.");
 					}
 				} catch (ClassNotFoundException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					JOptionPane.showMessageDialog(null,"Error");
+					loginSys();
 				} catch (SQLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					JOptionPane.showMessageDialog(null,"Error");
+					loginSys();
 				}
 			}
 		});
@@ -266,15 +280,16 @@ public class GUI {
 	public static void coachMainMenu() {
 		JFrame parent = new JFrame("WattFarm Main Menu");
 		parent.setSize(300,150);
-		parent.setLocation(750,500);
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		parent.setLocation(dim.width/2-parent.getSize().width/2, dim.height/2-parent.getSize().height/2);
 
 		JPanel menuPanel = new JPanel();
 		menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
 
 		/*Content in loginPanel */
 
-		JButton teamsButton = new JButton("Teams");
-		teamsButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+		JButton teamButton = new JButton("Team");
+		teamButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		JButton graphicsButton = new JButton("Graphics");
 		graphicsButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		JButton profileButton = new JButton("Profile");
@@ -283,16 +298,8 @@ public class GUI {
 		workoutsButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
 
-		/* Layout of panel */
-		teamsButton.setBounds(10, 10, 100, 20);
-		graphicsButton.setBounds(10, 40, 100, 20);
-		profileButton.setBounds(10, 70, 100, 20);
-		workoutsButton.setBounds(10, 100, 100, 20);
-
-
-
 		/* Add everything in and display */
-		menuPanel.add(teamsButton);
+		menuPanel.add(teamButton);
 		menuPanel.add(graphicsButton);
 		menuPanel.add(profileButton);
 		menuPanel.add(workoutsButton);
@@ -303,17 +310,35 @@ public class GUI {
 		parent.setVisible(true);
 
 		/* Action Listeners */
-		teamsButton.addActionListener(new ActionListener() {
+		teamButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				teamsMenu();
+				teamMenu();
 				parent.dispose();
 			}
 		});
 
 		graphicsButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				coachGraphicsMenu();
-				parent.dispose();
+				try {
+					if(Session.getNumCoachWorkouts() < 2) {
+						JOptionPane.showMessageDialog(null,"You need at least 2 logged team workouts to generate a Graphic.");
+						parent.dispose();
+						coachMainMenu();
+					}
+					else {
+						coachCreateGraphicPage();
+						parent.dispose();
+					}
+				} catch (HeadlessException e3) {
+					JOptionPane.showMessageDialog(null,"Error");
+					loginSys();
+				} catch (ClassNotFoundException e3) {
+					JOptionPane.showMessageDialog(null,"Error");
+					loginSys();
+				} catch (SQLException e3) {
+					JOptionPane.showMessageDialog(null,"Error");
+					loginSys();
+				}
 			}
 		});
 
@@ -332,44 +357,73 @@ public class GUI {
 		});
 	}
 
-	public static void coachGraphicsMenu() {
-		JFrame parent = new JFrame("Graphics Menu");
-		parent.setSize(300,200);
-		parent.setLocation(750,500);
+	public static void coachCreateGraphicPage() {
+		JFrame parent = new JFrame("Create Team Graphic:");
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		parent.setLocation(dim.width/2-parent.getSize().width/2, dim.height/2-parent.getSize().height/2);
 
-		JPanel menuPanel = new JPanel();
-		menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
+		Box formBox = Box.createVerticalBox();
 
 		/*Content in loginPanel */
+		JLabel paramLabel = new JLabel("Create a new graphic based on: ");
+		String[] params = {"DISTANCE", "SPLIT", "TIME", "AVGWATTS", "SPM"};
+		SpinnerListModel strModel1 = new SpinnerListModel(params);
+		JSpinner paramField = new JSpinner(strModel1);
+		JPanel paramPanel = new JPanel();
+		paramPanel.add(paramLabel);
+		paramPanel.add(paramField);
+		paramPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-		JButton createButton = new JButton("Create Graphic");
-		createButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-		JButton viewButton = new JButton("View Graphic");
-		viewButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+		//Get only specific types of results, or get all results
+		JLabel tagLabel = new JLabel("Filter workout type:");
+		String[] tags = {"All workout types" , "UT2", "UT1", "AT", "TR", "AN"};
+		SpinnerListModel strModel2 = new SpinnerListModel(tags);
+		JSpinner tagField = new JSpinner(strModel2);
+		JPanel tagPanel = new JPanel();
+		tagPanel.add(tagLabel);
+		tagPanel.add(tagField);
+
+		JButton enterButton = new JButton("Generate Graphic");
+		enterButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		JButton mainButton = new JButton("Main Menu");
-		mainButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+		enterButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+		/* Add stuff to panel */
+		formBox.add(paramPanel);
+		formBox.add(tagPanel);
+		formBox.add(enterButton);
+		formBox.add(mainButton);
 
-		/* Add everything in and display */
-		menuPanel.add(createButton);
-		menuPanel.add(viewButton);
-		menuPanel.add(mainButton);
-
-		parent.getContentPane().add(menuPanel);
+		parent.getContentPane().add(formBox);
 		parent.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		parent.pack();
 		parent.setVisible(true);
 
-		/* Action Listeners */
-		createButton.addActionListener(new ActionListener() {
+		//ActionListeners
+		enterButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				coachCreateGraphicPage();
-			}
-		});
+				ArrayList<Integer> values = null;
+				try {
+					values = Session.getCoachYVals((String)paramField.getValue() , (String)tagField.getValue());
 
-		viewButton.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				coachViewGraphicPage();
+					if(values.size() < 2) {
+						JOptionPane.showMessageDialog(null,"There needs to be at least 2 workouts with"
+								+ " the specified options to create a graphic.");
+						parent.dispose();
+						coachCreateGraphicPage();
+					} 
+					else {
+						Graphic.createPlot(values, (String) paramField.getValue());
+						parent.dispose();
+						coachMainMenu();
+					}
+				} catch (ClassNotFoundException e1) {
+					JOptionPane.showMessageDialog(null,"Error");
+					coachMainMenu();
+				} catch (SQLException e1) {
+					JOptionPane.showMessageDialog(null,"Error");
+					coachMainMenu();
+				}
 			}
 		});
 
@@ -381,73 +435,206 @@ public class GUI {
 		});
 	}
 
-	public static void coachCreateGraphicPage() {
-		System.exit(0);
-	}
-
-	public static void coachViewGraphicPage() {
-		System.exit(0);
-	}
-
 	public static void coachProfileMenu() {
 		JFrame parent = new JFrame("Profile Menu");
-		parent.setSize(300,200);
-		parent.setLocation(750,500);
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		parent.setLocation(dim.width/2-parent.getSize().width/2, dim.height/2-parent.getSize().height/2);
 
-		JPanel menuPanel = new JPanel();
-		menuPanel.setLayout (null);
+		JPanel profilePanel = new JPanel();
+		profilePanel.setLayout(new BoxLayout(profilePanel, BoxLayout.Y_AXIS));
 
-		/*Content in loginPanel */
+		//Obtains rower's information in JPanel format
+		try {
+			profilePanel.add(Session.getCoachProfile());
+		} catch (ClassNotFoundException e1) {
+			JOptionPane.showMessageDialog(null,"Error");
+			coachMainMenu();
+		} catch (SQLException e1) {
+			JOptionPane.showMessageDialog(null,"Error");
+			coachMainMenu();
+		}
 
+		//MenuPanel
+		JButton mainButton = new JButton("Main Menu");
 		JButton editButton = new JButton("Edit Profile");
 
-		/* Layout of panel */
-		editButton.setBounds(10, 10, 100, 20);
-
-
-		/* Add everything in and display */
+		JPanel menuPanel = new JPanel();
+		menuPanel.add(mainButton);
 		menuPanel.add(editButton);
 
-		parent.getContentPane().add(menuPanel);
+		profilePanel.add(menuPanel);
+
+		parent.getContentPane().add(profilePanel);
 		parent.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		parent.pack();
 		parent.setVisible(true);
 
 		/* Action Listeners */
 		editButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				coachEditProfilePage();
 				parent.dispose();
+				coachEditProfilePage();
+			}
+		});
+
+		mainButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				parent.dispose();
+				coachMainMenu();
 			}
 		});
 	}
 
 	public static void coachEditProfilePage() {
-		System.exit(0);
+		JFrame parent = new JFrame("Enter Profile Information");
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		parent.setLocation(dim.width/2-parent.getSize().width/2, dim.height/2-parent.getSize().height/2);
+		parent.setLayout(new BorderLayout());
+
+		JPanel formPanel = new JPanel();
+		formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
+
+		/*Content in loginPanel */
+		JLabel nameLabel = new JLabel("Name: ");
+		JTextField nameField = new JTextField(25);
+
+		JLabel teamLabel = new JLabel("Team:");
+		JPanel teamPanel = new JPanel();
+		teamPanel.add(teamLabel);
+		JSpinner teamField;
+
+		//get teams
+		String[] teams = null;
+		final boolean NOTEAMS;
+
+		try {
+			teams = Session.getTeams();
+		} catch (ClassNotFoundException e2) {
+			JOptionPane.showMessageDialog(null,"Error");
+			coachMainMenu();
+		} catch (SQLException e2) {
+			JOptionPane.showMessageDialog(null,"Error");
+			coachMainMenu();
+		}
+
+
+		//If no teams have been created, set no Teams to true and put in a placeholder option
+		if(teams.length < 1) {
+			NOTEAMS = true;
+			teams = new String[] {"No teams have been created"};
+		}
+		else {
+			NOTEAMS = false;
+		}
+
+		SpinnerListModel strModel = new SpinnerListModel(teams);
+		teamField = new JSpinner(strModel);
+		teamPanel.add(teamField);
+
+		JButton confirmButton = new JButton("Confirm");
+
+		/* Add stuff to panel */
+		JPanel namePanel = new JPanel();
+		namePanel.add(nameLabel);
+		namePanel.add(nameField);
+		formPanel.add(namePanel);
+
+		formPanel.add(teamPanel);
+
+		JPanel confirmPanel = new JPanel();
+		confirmPanel.add(confirmButton);
+
+		parent.getContentPane().add(formPanel, BorderLayout.CENTER);
+		parent.getContentPane().add(confirmPanel, BorderLayout.SOUTH);
+		parent.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		parent.pack();
+		parent.setVisible(true);
+
+		//ActionListeners
+		confirmButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					
+					if(!NOTEAMS) {
+						//get newTeamID based on selected name
+						String newTeamName = (String) teamField.getValue();
+						int newTeamID = Session.getTeamIDFromName((String) teamField.getValue());
+						
+						//get currentCoachID
+						int currentCoachID = Session.getCoachID();
+						
+						//get Coach's Current Team ID
+						int oldTeamID = Session.getCoachTeamID();
+						String oldTeamName = Session.getTeamName();
+						
+						//If team doesn't need to be changed, don't do anything
+						if(!newTeamName.equals(oldTeamName)) {
+							if(oldTeamID == -1 ) {
+								//coach doesn't have a team
+								if(!Session.changeCoachTeamID(newTeamID)) {
+									JOptionPane.showMessageDialog(null,"Error");
+								}
+								else if(!Session.changeTeamCoachID(newTeamName, currentCoachID)) {
+									JOptionPane.showMessageDialog(null,"Error");
+								}
+							}
+							else {
+								//coach has a team
+								
+								//set old team's coachID to -1
+								if(!Session.changeTeamCoachID(oldTeamName, -1)) {
+									JOptionPane.showMessageDialog(null,"Error");
+								}
+								else if(!Session.changeCoachTeamID(newTeamID)) {
+									JOptionPane.showMessageDialog(null,"Error");
+								}
+								else if(!Session.changeTeamCoachID(newTeamName, currentCoachID)) {
+									JOptionPane.showMessageDialog(null,"Error");
+								}
+							}
+						}
+						
+					}
+					
+					
+					Session.changeCoachName(nameField.getText());
+					
+					parent.dispose();
+					coachMainMenu();
+					
+				}
+				catch (ClassNotFoundException e1) {
+					JOptionPane.showMessageDialog(null,"Error");
+					coachMainMenu();
+				} catch (SQLException e1) {
+					JOptionPane.showMessageDialog(null,"Error");
+					coachMainMenu();
+				}
+			}
+		});
 	}
 
-	public static void teamsMenu() {
-		JFrame parent = new JFrame("Teams Menu");
+	public static void teamMenu() {
+		JFrame parent = new JFrame("Team Menu");
 		parent.setSize(300,200);
-		parent.setLocation(750,500);
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		parent.setLocation(dim.width/2-parent.getSize().width/2, dim.height/2-parent.getSize().height/2);
 
-		JPanel menuPanel = new JPanel();
-		menuPanel.setLayout (null);
+		Box menuPanel = Box.createVerticalBox();
 
 		/*Content in loginPanel */
 
-		JButton viewButton = new JButton("View Teams");
-		JButton editButton = new JButton("Edit Teams");
+		JButton viewButton = new JButton("View Team");
+		viewButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		JButton createButton = new JButton("Create Team");
-
-		/* Layout of panel */
-		viewButton.setBounds(10, 10, 100, 20);
-		editButton.setBounds(10, 40, 100, 20);
-		createButton.setBounds(10, 70, 100, 20);
+		createButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+		JButton mainButton = new JButton("Main Menu");
+		mainButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
 		/* Add everything in and display */
 		menuPanel.add(viewButton);
-		menuPanel.add(editButton);
 		menuPanel.add(createButton);
+		menuPanel.add(mainButton);
 
 		parent.getContentPane().add(menuPanel);
 		parent.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -461,27 +648,45 @@ public class GUI {
 			}
 		});
 
-		editButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				editTeamsPage();
-				parent.dispose();
-			}
-		});
-
 		createButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				createTeamPage();
 				parent.dispose();
 			}
 		});
+
+		mainButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				parent.dispose();
+				coachMainMenu();
+			}
+		});
 	}
 
 	public static void viewTeamPage() {
-		JFrame parent = new JFrame();
-		parent.setSize(500, 500);
-		parent.setLocation(750,500);
+		String name = "";
 
-		JPanel teamPanel = new JPanel();
+		try {
+			name = Session.getTeamName();
+		} catch (ClassNotFoundException e2) {
+			JOptionPane.showMessageDialog(null,"Error");
+			coachMainMenu();
+		} catch (SQLException e2) {
+			JOptionPane.showMessageDialog(null,"Error");
+			coachMainMenu();
+		}
+
+		if(name.equals("")) {
+			JOptionPane.showMessageDialog(null, "No team added to profile, add one to view roster.");
+			teamMenu();
+			return;
+		}
+
+		JFrame parent = new JFrame(name);
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		parent.setLocation(dim.width/2-parent.getSize().width/2, dim.height/2-parent.getSize().height/2);
+
+		Box teamPanel = Box.createVerticalBox();
 
 		/*Content in teamPanel */
 		JButton mainButton = new JButton("Main Menu");
@@ -493,11 +698,11 @@ public class GUI {
 		try {
 			scroller = new JScrollPane(Session.getRoster());
 		} catch (ClassNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			JOptionPane.showMessageDialog(null,"Error");
+			coachMainMenu();
 		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			JOptionPane.showMessageDialog(null,"Error");
+			coachMainMenu();
 		}
 
 		teamPanel.add(scroller);
@@ -510,6 +715,7 @@ public class GUI {
 
 		parent.getContentPane().add(teamPanel);
 		parent.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		parent.pack();
 		parent.setVisible(true);
 
 		/* Action Listeners */
@@ -519,10 +725,6 @@ public class GUI {
 				parent.dispose();
 			}
 		});
-	}
-
-	public static void editTeamsPage() {
-		System.exit(0);
 	}
 
 	public static void createTeamPage() {
@@ -537,7 +739,8 @@ public class GUI {
 
 
 		parent.setSize(500,200);
-		parent.setLocation(750,500);
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		parent.setLocation(dim.width/2-parent.getSize().width/2, dim.height/2-parent.getSize().height/2);
 
 		JPanel namePanel = new JPanel();
 		namePanel.add(nameLabel);
@@ -563,20 +766,20 @@ public class GUI {
 
 				try {
 					if(!Session.teamExists(enteredName)) {
-						JOptionPane.showMessageDialog(null,"New team created.");
 						Session.createTeam(enteredName);
+						JOptionPane.showMessageDialog(null,"New team created. Edit your profile to join.");
 						parent.dispose();
-						teamsMenu();
+						teamMenu();
 					}
 					else {
 						JOptionPane.showMessageDialog(null,"Team already exists. Please try again.");
 					}
 				} catch (ClassNotFoundException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					JOptionPane.showMessageDialog(null,"Error");
+					coachMainMenu();
 				} catch (SQLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					JOptionPane.showMessageDialog(null,"Error");
+					coachMainMenu();
 				}
 			}
 		});
@@ -591,21 +794,16 @@ public class GUI {
 
 	public static void coachWorkoutsMenu() {
 		JFrame parent = new JFrame("Workouts Menu");
-		parent.setSize(300,200);
-		parent.setLocation(750,500);
+		parent.setSize(300,100);
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		parent.setLocation(dim.width/2-parent.getSize().width/2, dim.height/2-parent.getSize().height/2);
 
-		JPanel menuPanel = new JPanel();
-		menuPanel.setLayout (null);
-
-		/*Content in loginPanel */
+		Box menuPanel = Box.createVerticalBox();
 
 		JButton viewButton = new JButton("View Workouts");
+		viewButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		JButton mainButton = new JButton("Main Menu");
-
-		/* Layout of panel */
-		viewButton.setBounds(10, 10, 100, 20);
-		mainButton.setBounds(120, 10, 100, 20);
-
+		mainButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
 		/* Add everything in and display */
 		menuPanel.add(viewButton);
@@ -635,7 +833,8 @@ public class GUI {
 	public static void coachViewWorkoutPage() {
 		JFrame parent = new JFrame("Workouts");
 		parent.setSize(500, 500);;
-		parent.setLocation(750,500);
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		parent.setLocation(dim.width/2-parent.getSize().width/2, dim.height/2-parent.getSize().height/2);
 
 		JPanel workoutsPanel = new JPanel();
 		//workoutsPanel.setLayout (new BorderLayout());
@@ -651,13 +850,14 @@ public class GUI {
 		try {
 			scroller = new JScrollPane(Session.getCoachWorkouts());
 		} catch (ClassNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			JOptionPane.showMessageDialog(null,"Error");
+			coachMainMenu();
 		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			JOptionPane.showMessageDialog(null,"Error");
+			coachMainMenu();
 		}
 
+		
 		workoutsPanel.add(scroller);
 
 		/* Add everything in and display */
@@ -692,7 +892,8 @@ public class GUI {
 	public static void rowerMainMenu() {
 		JFrame parent = new JFrame("WattFarm Main Menu");
 		parent.setSize(300,150);
-		parent.setLocation(750,500);
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		parent.setLocation(dim.width/2-parent.getSize().width/2, dim.height/2-parent.getSize().height/2);
 
 		JPanel menuPanel = new JPanel();
 		menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
@@ -718,8 +919,26 @@ public class GUI {
 		/* Action Listeners */
 		graphicsButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				rowerCreateGraphicPage();
-				parent.dispose();
+				try {
+					if(Session.getNumRowerWorkouts() < 2) {
+						JOptionPane.showMessageDialog(null,"Please log at least 2 workouts to create a graphic.");
+						parent.dispose();
+						rowerMainMenu();
+					}
+					else {
+						rowerCreateGraphicPage();
+						parent.dispose();
+					}
+				} catch (HeadlessException e3) {
+					JOptionPane.showMessageDialog(null,"Error");
+					rowerMainMenu();
+				} catch (ClassNotFoundException e3) {
+					JOptionPane.showMessageDialog(null,"Error");
+					rowerMainMenu();
+				} catch (SQLException e3) {
+					JOptionPane.showMessageDialog(null,"Error");
+					rowerMainMenu();
+				}
 			}
 		});
 
@@ -732,21 +951,22 @@ public class GUI {
 
 		workoutsButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				rowerWorkoutsMenu();
 				parent.dispose();
+				rowerWorkoutsMenu();
 			}
 		});
 	}
 
 	public static void rowerCreateGraphicPage() {
 		JFrame parent = new JFrame("Create Graphic:");
-		parent.setLocation(750,500);
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		parent.setLocation(dim.width/2-parent.getSize().width/2, dim.height/2-parent.getSize().height/2);
 
 		Box formBox = Box.createVerticalBox();
 
 		/*Content in loginPanel */
 		JLabel paramLabel = new JLabel("Create a new graphic based on: ");
-		String[] params = {"DISTANCE", "SPLIT", "TIME", "AVG WATTS", "SPM"};
+		String[] params = {"DISTANCE", "SPLIT", "TIME", "AVGWATTS", "SPM"};
 		SpinnerListModel strModel = new SpinnerListModel(params);
 		JSpinner paramField = new JSpinner(strModel);
 		JPanel paramPanel = new JPanel();
@@ -759,15 +979,15 @@ public class GUI {
 		try {
 			maxVals = Session.getNumRowerWorkouts();
 		} catch (ClassNotFoundException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
+			JOptionPane.showMessageDialog(null,"Error");
+			rowerMainMenu();
 		} catch (SQLException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
+			JOptionPane.showMessageDialog(null,"Error");
+			rowerMainMenu();
 		}
 		JSpinner nField = new JSpinner( new SpinnerNumberModel(
-				0, //initial value
-				0, //min
+				2, //initial value
+				2, //min
 				maxVals, //max
 				1)); //step
 		JPanel nPanel = new JPanel();
@@ -778,7 +998,7 @@ public class GUI {
 		JButton enterButton = new JButton("Generate Graphic");
 		enterButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		JButton mainButton = new JButton("Main Menu");
-		enterButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+		mainButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
 		/* Add stuff to panel */
 		formBox.add(paramPanel);
@@ -791,26 +1011,26 @@ public class GUI {
 		parent.pack();
 		parent.setVisible(true);
 
-		/*verify login info*/
+		//ActionListeners
 		enterButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				ArrayList<Integer> yValues = null;
+				ArrayList<Integer> values = null;
 				try {
-					yValues = Session.getYValues((String)paramField.getValue() , (Integer)nField.getValue());
+					values = Session.getRowerYVals((String)paramField.getValue() , (Integer)nField.getValue());
 				} catch (ClassNotFoundException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					JOptionPane.showMessageDialog(null,"Error");
+					rowerMainMenu();
 				} catch (SQLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					JOptionPane.showMessageDialog(null,"Error");
+					rowerMainMenu();
 				}
 
-				Graphic.createPlot(yValues, (String) paramField.getValue());
+				Graphic.createPlot(values, (String) paramField.getValue());
 				parent.dispose();
 				rowerMainMenu();
 			}
 		});
-		
+
 		mainButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				parent.dispose();
@@ -821,7 +1041,8 @@ public class GUI {
 
 	public static void rowerProfileMenu() {
 		JFrame parent = new JFrame("Profile Menu");
-		parent.setLocation(750,500);
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		parent.setLocation(dim.width/2-parent.getSize().width/2, dim.height/2-parent.getSize().height/2);
 
 		JPanel profilePanel = new JPanel();
 		profilePanel.setLayout(new BoxLayout(profilePanel, BoxLayout.Y_AXIS));
@@ -830,11 +1051,11 @@ public class GUI {
 		try {
 			profilePanel.add(Session.getRowerProfile());
 		} catch (ClassNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			JOptionPane.showMessageDialog(null,"Error");
+			rowerMainMenu();
 		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			JOptionPane.showMessageDialog(null,"Error");
+			rowerMainMenu();
 		}
 
 		//MenuPanel
@@ -870,7 +1091,8 @@ public class GUI {
 
 	public static void rowerEditProfilePage() {
 		JFrame parent = new JFrame("Enter Profile Information");
-		parent.setLocation(750,500);
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		parent.setLocation(dim.width/2-parent.getSize().width/2, dim.height/2-parent.getSize().height/2);
 		parent.setLayout(new BorderLayout());
 
 		JPanel formPanel = new JPanel();
@@ -901,19 +1123,41 @@ public class GUI {
 				400, //max
 				1));//step);
 
+
+
 		JLabel teamLabel = new JLabel("Team:");
+		JPanel teamPanel = new JPanel();
+		teamPanel.add(teamLabel);
+		JSpinner teamField;
+
+		//get teams
 		String[] teams = null;
+		final boolean NOTEAMS;
+
 		try {
 			teams = Session.getTeams();
 		} catch (ClassNotFoundException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
+			JOptionPane.showMessageDialog(null,"Error");
+			rowerMainMenu();
 		} catch (SQLException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		} //Spinner vals from teams table
+			JOptionPane.showMessageDialog(null,"Error");
+			rowerMainMenu();
+		}
+
+
+		//If no teams have been created, set no Teams to true and put in a placeholder option
+		if(teams.length < 1) {
+			NOTEAMS = true;
+			teams = new String[] {"No teams have been created"};
+		}
+		else {
+			NOTEAMS = false;
+		}
+
 		SpinnerListModel strModel = new SpinnerListModel(teams);
-		JSpinner teamField = new JSpinner(strModel);
+		teamField = new JSpinner(strModel);
+		teamPanel.add(teamField);
+
 
 
 		JButton confirmButton = new JButton("Confirm");
@@ -939,9 +1183,6 @@ public class GUI {
 		weightPanel.add(weightField);
 		formPanel.add(weightPanel);
 
-		JPanel teamPanel = new JPanel();
-		teamPanel.add(teamLabel);
-		teamPanel.add(teamField);
 		formPanel.add(teamPanel);
 
 		JPanel confirmPanel = new JPanel();
@@ -953,16 +1194,21 @@ public class GUI {
 		parent.pack();
 		parent.setVisible(true);
 
-		/*verify login info*/
+		//ActionListeners
 		confirmButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
+					String teamValue = "";
+					if(!NOTEAMS) {
+						teamValue = (String) teamField.getValue();
+					}
+
 					if(Session.editRowerProfile(
 							(String) nameField.getText(),
 							(Integer) ageField.getValue(),
 							(Integer) heightField.getValue(),
 							(Integer) weightField.getValue(),
-							(String)teamField.getValue())){
+							teamValue)){
 
 						JOptionPane.showMessageDialog(null,"Profile updated!");
 						parent.dispose();
@@ -974,24 +1220,21 @@ public class GUI {
 						rowerMainMenu();
 					}
 				} catch (ClassNotFoundException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					JOptionPane.showMessageDialog(null,"Error");
+					rowerMainMenu();
 				} catch (SQLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					JOptionPane.showMessageDialog(null,"Error");
+					rowerMainMenu();
 				}
 			}
 		});
-
-
-
-
 	}
 
 	public static void rowerWorkoutsMenu() {
 		JFrame parent = new JFrame("Workouts Menu");
 		parent.setPreferredSize(new Dimension(300, 200));
-		parent.setLocation(750,500);
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		parent.setLocation(dim.width/2-parent.getSize().width/2, dim.height/2-parent.getSize().height/2);
 
 		JPanel menuPanel = new JPanel();
 		menuPanel.setLayout (new FlowLayout());
@@ -1031,8 +1274,26 @@ public class GUI {
 
 		editButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				editWorkoutPage();
-				parent.dispose();
+				try {
+					if(Session.getNumRowerWorkouts() < 1) {
+						JOptionPane.showMessageDialog(null,"You have no workouts logged.");
+						parent.dispose();
+						rowerWorkoutsMenu();
+					}
+					else {
+						editWorkoutSelectPage();
+						parent.dispose();
+					}
+				} catch (HeadlessException e1) {
+					JOptionPane.showMessageDialog(null,"Error");
+					rowerMainMenu();
+				} catch (ClassNotFoundException e1) {
+					JOptionPane.showMessageDialog(null,"Error");
+					rowerMainMenu();
+				} catch (SQLException e1) {
+					JOptionPane.showMessageDialog(null,"Error");
+					rowerMainMenu();
+				}
 			}
 		});
 
@@ -1054,7 +1315,8 @@ public class GUI {
 	public static void newWorkoutPage() {
 		JFrame parent = new JFrame("Enter Workout Information");
 		parent.setSize(300,375);
-		parent.setLocation(750,500);
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		parent.setLocation(dim.width/2-parent.getSize().width/2, dim.height/2-parent.getSize().height/2);
 
 		Box formPanel = Box.createVerticalBox();
 
@@ -1157,7 +1419,7 @@ public class GUI {
 		parent.pack();
 		parent.setVisible(true);
 
-		/*verify login info*/
+		//ActionListeners
 		enterButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -1183,9 +1445,12 @@ public class GUI {
 						rowerMainMenu();
 					}
 				} catch (ClassNotFoundException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					JOptionPane.showMessageDialog(null,"Error");
+					rowerMainMenu();
 				} catch (SQLException e1) {
+					JOptionPane.showMessageDialog(null,"Error");
+					rowerMainMenu();
+				} catch (HeadlessException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				} catch (ParseException e1) {
@@ -1198,14 +1463,230 @@ public class GUI {
 		});
 	}
 
-	public static void editWorkoutPage() {
+	public static void editWorkoutSelectPage() {
+		JFrame parent = new JFrame("Edit Workout");
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		parent.setLocation(dim.width/2-parent.getSize().width/2, dim.height/2-parent.getSize().height/2);
 
+		Box formPanel = Box.createVerticalBox();
+
+		/*Content in loginPanel */
+		JLabel optionsLabel = new JLabel("Choose the workout you would like to edit:");
+		optionsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+		String[][] optionsAndIDs = null;
+
+		try {
+			optionsAndIDs = Session.getWorkoutOptions();
+		} catch (ClassNotFoundException e2) {
+			JOptionPane.showMessageDialog(null,"Error");
+			rowerMainMenu();
+		} catch (SQLException e2) {
+			JOptionPane.showMessageDialog(null,"Error");
+			rowerMainMenu();;
+		}
+
+		String[] options = new String[optionsAndIDs.length];
+		String[] ids = new String[optionsAndIDs.length];
+
+		for(int i = 0; i < optionsAndIDs.length; i++) {
+			options[i] = optionsAndIDs[i][0];
+			ids[i] = optionsAndIDs[i][1];
+		}
+
+
+
+		SpinnerListModel strModel = new SpinnerListModel(options);
+		JSpinner optionsField = new JSpinner(strModel);
+		formPanel.add(optionsLabel);
+		formPanel.add(optionsField);
+
+		JButton confirmButton = new JButton("Confirm");
+		JButton mainButton = new JButton("Main Menu");
+
+		JPanel enterPanel = new JPanel();
+		enterPanel.add(confirmButton);
+		enterPanel.add(mainButton);
+		formPanel.add(enterPanel);
+
+		parent.getContentPane().add(formPanel);
+		parent.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		parent.pack();
+		parent.setVisible(true);
+
+		//Action Listeners
+		confirmButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int workoutID = -1;
+				for(int i = 0; i < options.length; i++) {
+					if(options[i].equals(optionsField.getValue())) {
+						workoutID = Integer.parseInt(ids[i]);
+					}
+				}
+				parent.dispose();
+				editWorkoutPage(workoutID);
+			}
+		});
+
+		mainButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				parent.dispose();
+				rowerMainMenu();
+			}
+		});
+	}
+
+	public static void editWorkoutPage(int workoutID) {
+		JFrame parent = new JFrame("Enter Workout Information");
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		parent.setLocation(dim.width/2-parent.getSize().width/2, dim.height/2-parent.getSize().height/2);
+		Box formPanel = Box.createVerticalBox();
+
+		/*Content in workout form */
+		JLabel distanceLabel = new JLabel("Distance (m): ");
+		JSpinner distanceField = new JSpinner( new SpinnerNumberModel(
+				2000, //initial value
+				0, //min
+				100000, //max
+				10));//step);
+
+		JLabel splitLabel = new JLabel("Time/500m (s): ");
+		JSpinner splitField = new JSpinner( new SpinnerNumberModel(
+				120, //initial value
+				0, //min
+				500, //max
+				1));//step);
+
+		JLabel timeLabel = new JLabel("Time (s):         ");
+		JSpinner timeField = new JSpinner( new SpinnerNumberModel(
+				480, //initial value
+				0, //min
+				12000000, //max
+				1));//step);
+
+		JLabel wattsLabel = new JLabel("Average Watts (W): ");
+		JSpinner wattsField = new JSpinner( new SpinnerNumberModel(
+				10, //initial value
+				0, //min
+				2000, //max
+				1));//step);
+
+		JLabel spmLabel = new JLabel("Strokes/Minute: ");
+		JSpinner spmField = new JSpinner( new SpinnerNumberModel(
+				20, //initial value
+				0, //min
+				100, //max
+				1));//step);
+
+		JLabel dateLabel = new JLabel("Date Completed: ");
+		SpinnerDateModel model = new SpinnerDateModel();
+		JSpinner dateField = new JSpinner(model);
+
+		JSpinner.DateEditor editor = new JSpinner.DateEditor(dateField, "yyyy.MM.dd");
+		DateFormatter formatter = (DateFormatter)editor.getTextField().getFormatter();
+		formatter.setAllowsInvalid(false);
+		formatter.setOverwriteMode(true);
+
+		JLabel tagLabel = new JLabel("Workout Tag:");
+		String[] tags = {"UT2", "UT1", "AT", "TR", "AN"};
+		SpinnerListModel strModel = new SpinnerListModel(tags);
+		JSpinner tagField = new JSpinner(strModel);
+
+
+		JButton enterButton = new JButton("Enter Workout");
+
+		/* Add stuff to panel */
+		JPanel distancePanel = new JPanel();
+		distancePanel.add(distanceLabel);
+		distancePanel.add(distanceField);
+		formPanel.add(distancePanel);
+
+		JPanel splitPanel = new JPanel();
+		splitPanel.add(splitLabel);
+		splitPanel.add(splitField);
+		formPanel.add(splitPanel);
+
+		JPanel timePanel = new JPanel();
+		timePanel.add(timeLabel);
+		timePanel.add(timeField);
+		formPanel.add(timePanel);
+
+
+		JPanel wattsPanel = new JPanel();
+		wattsPanel.add(wattsLabel);
+		wattsPanel.add(wattsField);
+		formPanel.add(wattsPanel);
+
+		JPanel spmPanel = new JPanel();
+		spmPanel.add(spmLabel);
+		spmPanel.add(spmField);
+		formPanel.add(spmPanel);
+
+		JPanel datePanel = new JPanel();
+		datePanel.add(dateLabel);
+		datePanel.add(dateField);
+		formPanel.add(datePanel);
+
+		JPanel tagPanel = new JPanel();
+		tagPanel.add(tagLabel);
+		tagPanel.add(tagField);
+		formPanel.add(tagPanel);
+
+		JPanel enterPanel = new JPanel();
+		enterPanel.add(enterButton);
+		formPanel.add(enterPanel);
+
+		parent.getContentPane().add(formPanel);
+		parent.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		parent.pack();
+		parent.setVisible(true);
+
+		//Action Listeners
+		enterButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+					String newDateStr = format.format(dateField.getValue());
+
+					if(Session.editWorkout(new Workout(
+							(Integer) distanceField.getValue(),
+							(Integer) timeField.getValue(),
+							(Integer) splitField.getValue(),
+							(Integer) wattsField.getValue(),
+							(Integer) spmField.getValue(),
+							newDateStr,
+							(String) tagField.getValue()), workoutID)){
+
+						JOptionPane.showMessageDialog(null,"Workout logged!");
+						parent.dispose();
+						rowerMainMenu();
+					}
+					else {
+						JOptionPane.showMessageDialog(null,"Error, please try again.");
+						parent.dispose();
+						rowerMainMenu();
+					}
+				} catch (ClassNotFoundException e1) {
+					JOptionPane.showMessageDialog(null,"Error");
+					rowerMainMenu();
+				} catch (SQLException e1) {
+					JOptionPane.showMessageDialog(null,"Error");
+					rowerMainMenu();
+				} catch (ParseException e1) {
+					JOptionPane.showMessageDialog(null,"Error");
+					rowerMainMenu();
+				}
+
+
+			}
+		});
 	}
 
 	public static void viewRowerWorkoutsPage() {
 		JFrame parent = new JFrame("Workouts");
 		parent.setSize(500, 500);;
-		parent.setLocation(750,500);
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		parent.setLocation(dim.width/2-parent.getSize().width/2, dim.height/2-parent.getSize().height/2);
 
 		JPanel workoutsPanel = new JPanel();
 		workoutsPanel.setLayout(new BoxLayout(workoutsPanel, BoxLayout.Y_AXIS));
@@ -1222,11 +1703,11 @@ public class GUI {
 		try {
 			scroller = new JScrollPane(Session.getRowerWorkouts());
 		} catch (ClassNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			JOptionPane.showMessageDialog(null,"Error");
+			rowerMainMenu();
 		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			JOptionPane.showMessageDialog(null,"Error");
+			rowerMainMenu();
 		}
 
 		workoutsPanel.add(scroller);
@@ -1246,8 +1727,26 @@ public class GUI {
 
 		editButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				editWorkoutPage();
-				parent.dispose();
+				try {
+					if(Session.getNumRowerWorkouts() < 1) {
+						JOptionPane.showMessageDialog(null,"You have no workouts logged.");
+						parent.dispose();
+						rowerWorkoutsMenu();
+					}
+					else {
+						editWorkoutSelectPage();
+						parent.dispose();
+					}
+				} catch (HeadlessException e1) {
+					JOptionPane.showMessageDialog(null,"Error");
+					rowerMainMenu();
+				} catch (ClassNotFoundException e1) {
+					JOptionPane.showMessageDialog(null,"Error");
+					rowerMainMenu();
+				} catch (SQLException e1) {
+					JOptionPane.showMessageDialog(null,"Error");
+					rowerMainMenu();
+				}
 			}
 		});
 
